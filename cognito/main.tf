@@ -1,5 +1,5 @@
 resource "aws_cognito_user_pool" "pool" {
-  name = "baitersburger-customer-pool"
+  name                     = "baitersburger-customer-pool"
   auto_verified_attributes = []
   mfa_configuration        = "OFF"
 
@@ -19,8 +19,8 @@ resource "aws_cognito_user_pool_domain" "domain" {
 }
 
 resource "aws_cognito_resource_server" "resource" {
-  identifier = "baitersburger-api"
-  name       = "BaitersBurger API"
+  identifier   = "baitersburger-api"
+  name         = "BaitersBurger API"
   user_pool_id = aws_cognito_user_pool.pool.id
 
   scope {
