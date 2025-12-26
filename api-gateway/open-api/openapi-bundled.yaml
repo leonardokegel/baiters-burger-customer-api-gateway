@@ -1,4 +1,4 @@
-openapi: 3.0.1
+openapi: 3.0.4
 info:
   title: Baiters Burger Customer API
   description: API para gerenciar os clientes.
@@ -8,7 +8,7 @@ tags:
   - name: Customers
   - name: Auth
 paths:
-  /customers:
+  /api/v1/customers:
     post:
       tags:
         - Customers
@@ -30,11 +30,11 @@ paths:
       x-amazon-apigateway-integration:
         type: http_proxy
         httpMethod: POST
-        uri: 'http://${nlb_dns_name}/api/v1/customers'
+        uri: 'http://${nlb_dns_name}:8080/api/v1/customers'
         connectionType: VPC_LINK
         connectionId: '${vpc_link_id}'
         passthroughBehavior: when_no_match
-  '/customers/{cpf}':
+  '/api/v1/customers/{cpf}':
     get:
       tags:
         - Customers
@@ -60,7 +60,7 @@ paths:
       x-amazon-apigateway-integration:
         type: http_proxy
         httpMethod: GET
-        uri: 'http://${nlb_dns_name}/api/v1/customers/{cpf}'
+        uri: 'http://${nlb_dns_name}:8080/api/v1/customers/{cpf}'
         connectionType: VPC_LINK
         connectionId: '${vpc_link_id}'
         passthroughBehavior: when_no_match
@@ -114,8 +114,4 @@ components:
       x-amazon-apigateway-authorizer:
         type: token
         authorizerUri: '${authorizer_lambda_invoke_arn}'
-        authorizerResultTtlInSeconds: 300
-  x-amazon-apigateway-request-validators: null
-  all:
-    validateRequestBody: true
-    validateRequestParameters: true
+        identitySource: method.request.header.Authorization

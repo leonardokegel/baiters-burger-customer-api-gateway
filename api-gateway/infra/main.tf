@@ -12,14 +12,6 @@ resource "aws_api_gateway_rest_api" "api" {
   }
 }
 
-resource "aws_api_gateway_authorizer" "lambda_auth" {
-  name                             = "baitersburger-authorizer"
-  rest_api_id                      = aws_api_gateway_rest_api.api.id
-  authorizer_uri                   = var.authorizer_lambda_invoke_arn
-  authorizer_result_ttl_in_seconds = 300
-  type                             = "TOKEN"
-}
-
 resource "aws_api_gateway_deployment" "this" {
   rest_api_id = aws_api_gateway_rest_api.api.id
 
