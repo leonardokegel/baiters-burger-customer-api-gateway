@@ -1,0 +1,91 @@
+openapi: 3.0.4
+info:
+  title: Baiters Burger Customer API
+  description: API para gerenciar os clientes.
+  version: 1.0.0
+
+x-amazon-apigateway-request-validator: "all"
+
+tags:
+    - name: "Customers"
+    - name: "Auth"
+
+paths:
+  /api/v1/customers:
+    post:
+      tags: [Customers]
+      summary: Cadastra um novo cliente
+      security:
+        - LambdaAuthorizer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CustomerInput"
+            examples:
+              default:
+                $ref: "#/components/examples/NewCustomer"
+      responses:
+          "201":
+            description: "Cliente criado com sucesso"
+      x-amazon-apigateway-integration:
+        type: "http_proxy"
+        httpMethod: "POST"
+        uri: "http://${nlb_dns_name}:8080/api/v1/customers"
+        connectionType: "VPC_LINK"
+        connectionId: "${vpc_link_id}"
+        passthroughBehavior: "when_no_match"
+
+  /api/v1/customers/{cpf}:
+    get:
+      tags: [Customers]
+      summary: "Busca um cliente pelo CPF"
+      security:
+        - LambdaAuthorizer: []
+      parameters:
+        - name: "cpf"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+      responses:
+        "200":
+          description: "Dados do cliente"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Customer"
+              examples:
+                default:
+                  $ref: "#/components/examples/CustomerResponse"
+      x-amazon-apigateway-integration:
+        type: "http_proxy"
+        httpMethod: "GET"
+        uri: "http://${nlb_dns_name}:8080/api/v1/customers/{cpf}"
+        connectionType: "VPC_LINK"
+        connectionId: "${vpc_link_id}"
+        passthroughBehavior: "when_no_match"
+        requestParameters:
+          integration.request.path.cpf: "method.request.path.cpf"
+components:
+  schemas:
+    Customer:
+      $ref: './schemas/Customer.yaml'
+    CustomerInput:
+            $ref: "./schemas/CustomerInput.yaml"
+  examples:
+      CustomerResponse:
+        $ref: './examples/CustomerResponse.yaml'
+      NewCustomer:
+            $ref: "./examples/NewCustomer.yaml"
+  securitySchemes:
+    LambdaAuthorizer:
+      type: "apiKey"
+      name: "Authorization"
+      in: header
+      x-amazon-apigateway-authtype: "custom"
+      x-amazon-apigateway-authorizer:
+          type: token
+          authorizerUri: "${authorizer_lambda_invoke_arn}"
+          identitySource: method.request.header.Authorization
